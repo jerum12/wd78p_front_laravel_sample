@@ -1,4 +1,14 @@
-import { Alert, Avatar, Box, Button, Container, Grid, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Grid,
+  TextField,
+  Typography,
+} from '@mui/material';
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +16,8 @@ import { useNavigate } from 'react-router-dom';
 function Login() {
   const navigate = useNavigate();
   const apiBackendUrl = process.env.REACT_APP_BACK_END_URL;
+
+  const [submitLoading, setsubmitLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -22,8 +34,10 @@ function Login() {
   };
 
   const handleSubmit = async (event) => {
+    setsubmitLoading(true);
     setError('');
     if (!validateForm()) {
+      setsubmitLoading(false);
       return;
     } else {
       try {
@@ -32,10 +46,12 @@ function Login() {
         const response = await axios.post(`${apiBackendUrl}login`, formData);
         console.log(response);
         const token = response.data.token;
+        setsubmitLoading(false);
         localStorage.setItem('login_token', token);
         navigate('/dashboard');
       } catch (error) {
         console.log(error);
+        setsubmitLoading(false);
         setError(error.response.data.message);
       }
     }
@@ -108,8 +124,8 @@ function Login() {
           </Grid>
 
           <Box style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-            <Button variant="outlined" onClick={handleSubmit}>
-              Login
+            <Button variant="outlined" onClick={handleSubmit} disabled={submitLoading}>
+              {submitLoading ? <CircularProgress size={'10px'} /> : ''} Login
             </Button>
           </Box>
         </Box>
